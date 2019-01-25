@@ -1,6 +1,6 @@
 {
     "name": "nemo64/zip-stream",
-    "description": "Create a Response object out of many files.",
+    "description": "Quickly stream multiple files without creating an archive first.",
     "type": "library",
     "license": "MIT",
     "authors": [
