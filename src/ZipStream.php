@@ -53,7 +53,7 @@ class ZipStream implements StreamInterface
             throw new \RuntimeException("Files larger than 4GB ($name) are not implemented.", 1545244929);
         }
 
-        if (count($this->files) === 65535) {
+        if (count($this->files) >= 65535) {
             throw new \RuntimeException("A zip file can only contain 65535 files.");
         }
 
