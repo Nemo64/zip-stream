@@ -69,6 +69,11 @@ class ZipStream implements StreamInterface
         return $this->crc32[$name];
     }
 
+    private static function pack(...$values)
+    {
+        return pack(implode("", array_column($values, 0)), ...array_column($values, 1));
+    }
+
     protected function createStream()
     {
         $this->locked = true;
@@ -95,14 +100,16 @@ class ZipStream implements StreamInterface
         }
 
         $stream->addStream(stream_for(
-            pack('V', 0x06054b50) // end of central file header signature
-            . pack('v', 0x00) // this disk number
-            . pack('v', 0x00) // number of disk with cdr
-            . pack('v', count($this->files)) // number of entries (on this disk)
-            . pack('v', count($this->files)) // number of entries
-            . pack('V', $cdsSize) // cds size
-            . pack('V', $cdsPosition) // cds position
-            . pack('v', 0x00) // zip file comment length
+            self::pack(
+                ['V', 0x06054b50], // end of central file header signature
+                ['v', 0x00], // this disk number
+                ['v', 0x00], // number of disk with cdr
+                ['v', count($this->files)], // number of entries (on this disk)
+                ['v', count($this->files)], // number of entries
+                ['V', $cdsSize], // cds size
+                ['V', $cdsPosition], // cds position
+                ['v', 0x00] // zip file comment length
+            )
         ));
 
         return $stream;
@@ -112,17 +119,19 @@ class ZipStream implements StreamInterface
     {
         $headerSize = 30 + strlen($name);
         $callback = function () use ($name, $headerSize) {
-            return pack('V', 0x04034b50) // local file header signature
-                . pack('v', 0x000A) // version needed to extract
-                . pack('v', 0x08) // general purpose bit flag (defines UTF-8 filename here)
-                . pack('v', 0x00) // compression method... in this case none
-                . pack('V', 0) // TODO dos timestamp
-                . pack('V', $this->getCrc32($name)) // crc32 of data
-                . pack('V', $this->files[$name]->getSize()) // compressed size
-                . pack('V', $this->files[$name]->getSize()) // uncompressed size ~ obviously the same if not compressed
-                . pack('v', strlen($name))
-                . pack('v', 0x00) // extra data length
-                . $name;
+            $header = self::pack(
+                ['V', 0x04034b50], // local file header signature
+                ['v', 0x000A], // version needed to extract
+                ['v', 0x08], // general purpose bit flag (defines UTF-8 filename here)
+                ['v', 0x00], // compression method... in this case none
+                ['V', 0], // TODO dos timestamp
+                ['V', $this->getCrc32($name)], // crc32 of data
+                ['V', $this->files[$name]->getSize()], // compressed size
+                ['V', $this->files[$name]->getSize()], // uncompressed size ~ obviously the same if not compressed
+                ['v', strlen($name)],
+                ['v', 0x00] // extra data length
+            );
+            return $header . $name;
         };
 
         return new LazyCallbackStream($callback, $headerSize);
@@ -132,23 +141,25 @@ class ZipStream implements StreamInterface
     {
         $headerSize = 46 + strlen($name);
         $callback = function () use ($name, $offset, $headerSize) {
-            return pack('V', 0x02014b50) // central file header signature
-                . pack('v', 0x003F) // Ver 6.3, OS_FAT
-                . pack('v', 0x000A) // version needed to extract
-                . pack('v', 0x08) // general purpose bit flag (defines UTF-8 filename here)
-                . pack('v', 0x00) // compression method... in this case none
-                . pack('V', 0) // TODO dos timestamp
-                . pack('V', $this->getCrc32($name)) // crc32 of data
-                . pack('V', $this->files[$name]->getSize()) // compressed size
-                . pack('V', $this->files[$name]->getSize()) // uncompressed size ~ obviously the same if not compressed
-                . pack('v', strlen($name))
-                . pack('v', 0) // extra data length
-                . pack('v', 0) // file comment length
-                . pack('v', 0) // disk number start
-                . pack('v', 0) // internal file attributes
-                . pack('V', 32) // external file attributes
-                . pack('V', $offset) // offset
-                . $name;
+            $header = self::pack(
+                ['V', 0x02014b50], // central file header signature
+                ['v', 0x003F], // Ver 6.3, OS_FAT
+                ['v', 0x000A], // version needed to extract
+                ['v', 0x08], // general purpose bit flag (defines UTF-8 filename here)
+                ['v', 0x00], // compression method... in this case none
+                ['V', 0], // TODO dos timestamp
+                ['V', $this->getCrc32($name)], // crc32 of data
+                ['V', $this->files[$name]->getSize()], // compressed size
+                ['V', $this->files[$name]->getSize()], // uncompressed size ~ obviously the same if not compressed
+                ['v', strlen($name)],
+                ['v', 0], // extra data length
+                ['v', 0], // file comment length
+                ['v', 0], // disk number start
+                ['v', 0], // internal file attributes
+                ['V', 32], // external file attributes
+                ['V', $offset] // offset
+            );
+            return $header . $name;
         };
 
         return new LazyCallbackStream($callback, $headerSize);
