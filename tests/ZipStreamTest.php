@@ -12,10 +12,7 @@ class ZipStreamTest extends TestCase
 {
     public function testBasicFile()
     {
-        $testStream = stream_for(fopen('php://temp', 'w+b'));
-        $testString = "hallo welt";
-
-        $testStream->write($testString);
+        $testStream = stream_for("hallo welt");
 
         $zip = new ZipStream();
         $zip->add('myfile', $testStream);
@@ -29,6 +26,6 @@ class ZipStreamTest extends TestCase
         $reader = new \ZipArchive();
         $reader->open($zipFileName);
         $this->assertEquals(1, $reader->numFiles, $zipFileName);
-        $this->assertEquals($testString, $reader->getFromName('myfile'), $zipFileName);
+        $this->assertEquals($testStream->__toString(), $reader->getFromName('myfile'), $zipFileName);
     }
 }
