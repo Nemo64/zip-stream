@@ -57,6 +57,10 @@ class ZipStream implements StreamInterface
             throw new \RuntimeException("A zip file can only contain 65535 files.");
         }
 
+        if (in_array($stream, $this->files, true)) {
+            throw new \RuntimeException("The same stream can only be added once.");
+        }
+
         $this->files[$name] = $stream;
     }
 
