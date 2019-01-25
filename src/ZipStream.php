@@ -33,7 +33,7 @@ class ZipStream implements StreamInterface
         }
 
         if (strlen($name) > 65535) {
-            throw new \RuntimeException("Filename too long.", 1545244717);
+            throw new \RuntimeException("Filename too long: $name", 1545244717);
         }
 
         if (!$stream->isReadable()) {
@@ -50,7 +50,7 @@ class ZipStream implements StreamInterface
         }
 
         if ($size > 4294967295) {
-            throw new \RuntimeException("File above 4GB are not implemented.", 1545244929);
+            throw new \RuntimeException("Files larger than 4GB ($name) are not implemented.", 1545244929);
         }
 
         if (count($this->files) === 65535) {
