@@ -23,6 +23,7 @@ class ZipStream implements StreamInterface
 
     public function __construct()
     {
+        // disable the constructor of the trait
     }
 
     public function add(string $name, StreamInterface $stream)
