@@ -4,9 +4,9 @@ namespace Nemo64\ZipStream;
 
 
 use GuzzleHttp\Psr7\AppendStream;
-use function GuzzleHttp\Psr7\stream_for;
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use Psr\Http\Message\StreamInterface;
+use function GuzzleHttp\Psr7\stream_for;
 
 class ZipStream implements StreamInterface
 {
@@ -165,16 +165,24 @@ class ZipStream implements StreamInterface
 
     public function close()
     {
-        $this->stream->close();
-        $this->locked = false;
+        if ($this->locked) {
+            $this->stream->close();
+            $this->locked = false;
+            unset($this->stream);
+        }
+
         $this->files = [];
         $this->crc32 = [];
     }
 
     public function detach()
     {
-        $this->stream->detach();
-        $this->locked = false;
+        if ($this->locked) {
+            $this->stream->detach();
+            $this->locked = false;
+            unset($this->stream);
+        }
+
         $this->files = [];
         $this->crc32 = [];
     }
