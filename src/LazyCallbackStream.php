@@ -29,7 +29,16 @@ class LazyCallbackStream implements StreamInterface
 
     protected function createStream()
     {
-        return stream_for(call_user_func($this->callable));
+        $stream = stream_for(call_user_func($this->callable));
+
+        if ($this->size !== null) {
+            $size = $stream->getSize();
+            if ($size !== $this->size) {
+                throw new \LogicException("Callback size ($size) and specified size ($this->size) differ.");
+            }
+        }
+
+        return $stream;
     }
 
     public function getSize()

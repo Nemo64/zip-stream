@@ -112,7 +112,7 @@ class ZipStream implements StreamInterface
     {
         $headerSize = 30 + strlen($name);
         $callback = function () use ($name, $headerSize) {
-            $str = pack('V', 0x04034b50) // local file header signature
+            return pack('V', 0x04034b50) // local file header signature
                 . pack('v', 0x000A) // version needed to extract
                 . pack('v', 0x08) // general purpose bit flag (defines UTF-8 filename here)
                 . pack('v', 0x00) // compression method... in this case none
@@ -123,13 +123,6 @@ class ZipStream implements StreamInterface
                 . pack('v', strlen($name))
                 . pack('v', 0x00) // extra data length
                 . $name;
-
-            $actualHeaderSize = strlen($str);
-            if ($actualHeaderSize !== $headerSize) {
-                throw new \LogicException("Header size miscalculated. Expected $headerSize, got $actualHeaderSize for $name.");
-            }
-
-            return $str;
         };
 
         return new LazyCallbackStream($callback, $headerSize);
@@ -139,7 +132,7 @@ class ZipStream implements StreamInterface
     {
         $headerSize = 46 + strlen($name);
         $callback = function () use ($name, $offset, $headerSize) {
-            $str = pack('V', 0x02014b50) // central file header signature
+            return pack('V', 0x02014b50) // central file header signature
                 . pack('v', 0x003F) // Ver 6.3, OS_FAT
                 . pack('v', 0x000A) // version needed to extract
                 . pack('v', 0x08) // general purpose bit flag (defines UTF-8 filename here)
@@ -156,13 +149,6 @@ class ZipStream implements StreamInterface
                 . pack('V', 32) // external file attributes
                 . pack('V', $offset) // offset
                 . $name;
-
-            $actualHeaderSize = strlen($str);
-            if ($actualHeaderSize !== $headerSize) {
-                throw new \LogicException("CDS size miscalculated. Expected $headerSize, got $actualHeaderSize for $name.");
-            }
-
-            return $str;
         };
 
         return new LazyCallbackStream($callback, $headerSize);
