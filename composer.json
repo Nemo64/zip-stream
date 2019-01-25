@@ -1,0 +1,34 @@
+{
+    "name": "nemo64/zip-stream",
+    "description": "Create a Response object out of many files.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marco Pfeiffer",
+            "email": "git@marco.zone"
+        }
+    ],
+    "require": {
+        "php": ">=7.1, <7.4",
+        "guzzlehttp/psr7": "^1.5",
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "ext-zip": "^1.0",
+        "phpunit/phpunit": "^7.5"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Nemo64\\ZipStream\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nemo64\\ZipStream\\Tests\\": "tests"
+        }
+    }
+}
