@@ -27,7 +27,11 @@ class ZipResponse
             $headers['Content-Length'] = $size;
         } else {
             $errorMsg = "$filename exceeds PHP_INT_MAX and is therefor not precise. Content-Length is omitted.";
-            trigger_error($errorMsg, E_USER_WARNING);
+
+            // trigger a warning using a silencing operator.
+            // this way the error message won't be displayed within the zip but an error handler can still see it.
+            // inspired by https://symfony.com/doc/3.4/contributing/code/conventions.html#deprecations
+            @trigger_error($errorMsg, E_USER_WARNING);
         }
 
         return new Response(200, $headers, $stream);
