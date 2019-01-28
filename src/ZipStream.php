@@ -187,14 +187,4 @@ class ZipStream implements StreamInterface
         $this->files = [];
         $this->crc32 = [];
     }
-
-    public function isWritable()
-    {
-        return false;
-    }
-
-    public function write($string)
-    {
-        throw new \RuntimeException("ZipStream is not writable.");
-    }
 }
