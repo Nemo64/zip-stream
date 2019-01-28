@@ -22,17 +22,7 @@ class ZipResponse
             ? "attachment; filename=$filenameFallback; filename*=UTF-8''" . urlencode($filename)
             : "attachment; filename=$filenameFallback";
 
-        $size = $stream->getSize();
-        if (is_int($size) && $size <= PHP_INT_MAX && $size > 0) {
-            $headers['Content-Length'] = $size;
-        } else {
-            $errorMsg = "$filename exceeds PHP_INT_MAX and is therefor not precise. Content-Length is omitted.";
-
-            // trigger a warning using a silencing operator.
-            // this way the error message won't be displayed within the zip but an error handler can still see it.
-            // inspired by https://symfony.com/doc/3.4/contributing/code/conventions.html#deprecations
-            @trigger_error($errorMsg, E_USER_WARNING);
-        }
+        $headers['Content-Length'] = $stream->getSize();
 
         return new Response(200, $headers, $stream);
     }

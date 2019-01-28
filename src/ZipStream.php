@@ -5,6 +5,7 @@ namespace Nemo64\ZipStream;
 
 use GuzzleHttp\Psr7\AppendStream;
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
+use PHP\Math\BigInteger\BigInteger;
 use Psr\Http\Message\StreamInterface;
 use function GuzzleHttp\Psr7\stream_for;
 
@@ -20,6 +21,9 @@ class ZipStream implements StreamInterface
 
     /** @var bool */
     private $locked = false;
+
+    /** @var BigInteger|null */
+    private $bigSize = null;
 
     public function __construct()
     {
@@ -80,7 +84,7 @@ class ZipStream implements StreamInterface
 
         $stream = new AppendStream();
         $cdsStreams = [];
-        $cdsPosition = 0;
+        $cdsPosition = new BigInteger();
         $cdsSize = 0;
 
         foreach ($this->files as $fileName => $fileStream) {
@@ -90,8 +94,8 @@ class ZipStream implements StreamInterface
             $stream->addStream($headerStream);
             $stream->addStream($fileStream);
 
-            $cdsStreams[] = $this->getCdsStream($fileName, $cdsPosition);
-            $cdsPosition += $headerStream->getSize() + $fileStream->getSize();
+            $cdsStreams[] = $this->getCdsStream($fileName, $cdsPosition->getValue());
+            $cdsPosition->add($headerStream->getSize() + $fileStream->getSize());
         }
 
         foreach ($cdsStreams as $cdsStream) {
@@ -106,11 +110,12 @@ class ZipStream implements StreamInterface
             count($this->files), // number of entries (on this disk)
             count($this->files), // number of entries
             $cdsSize, // cds size
-            $cdsPosition, // cds position
+            $cdsPosition->getValue(), // cds position
             0x0000 // zip file comment length
         );
         $stream->addStream(stream_for($eofHeader));
 
+        $this->bigSize = $cdsPosition->add(strlen($eofHeader));
         return $stream;
     }
 
@@ -162,6 +167,24 @@ class ZipStream implements StreamInterface
         };
 
         return new LazyCallbackStream($callback, $headerSize);
+    }
+
+    /**
+     * Returns the expected size of the stream.
+     * If the size exceeds PHP_MAX_INT, than it will return a string with the expected size.
+     * Note that zip64 isn't implemented which means some programs might not be able to open the file.
+     *
+     * @return int|string
+     */
+    public function getSize()
+    {
+        $size = $this->stream->getSize();
+
+        if (!is_int($size)) {
+            $size = $this->bigSize->getValue();
+        }
+
+        return $size;
     }
 
     public function close()
