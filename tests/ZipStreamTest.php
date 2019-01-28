@@ -3,10 +3,10 @@
 namespace Nemo64\ZipStream\Tests;
 
 
-use function GuzzleHttp\Psr7\copy_to_stream;
-use function GuzzleHttp\Psr7\stream_for;
 use Nemo64\ZipStream\ZipStream;
 use PHPUnit\Framework\TestCase;
+use function GuzzleHttp\Psr7\copy_to_stream;
+use function GuzzleHttp\Psr7\stream_for;
 
 class ZipStreamTest extends TestCase
 {
@@ -31,6 +31,11 @@ class ZipStreamTest extends TestCase
             // might get memory problems
             $this->assertEquals($stream->__toString(), $reader->getFromName($name), $zipFileName);
         }
+    }
+
+    public function testEmpty()
+    {
+        $this->assertZip([]);
     }
 
     public function testBasicFile()
