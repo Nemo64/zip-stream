@@ -30,12 +30,13 @@ Some Frameworks start to support this but in the mean time i'll recommend you us
 
 ```PHP
 use function GuzzleHttp\Psr7\stream_for;
+use function GuzzleHttp\Psr7\try_fopen;
 use Narrowspark\HttpEmitter\SapiStreamEmitter;
 use Nemo64\ZipStream\ZipResponse;
 use Nemo64\ZipStream\ZipStream;
 
 $zip = new ZipStream();
-$zip->add('file1.jpg', stream_for('file1.jpg'));
+$zip->add('file1.jpg', stream_for(try_fopen('file1.jpg', 'r')));
 
 // be sure that before you send this response that there is no output buffering engaged.
 while (@ob_end_clean()) {}
