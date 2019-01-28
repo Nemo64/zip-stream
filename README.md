@@ -12,7 +12,7 @@ In fact, there should be very little difference compared to just sending the fil
 
 Here are some special characteristics:
 
-- no files area created so no cleanup is nessesary
+- no files are created so no cleanup is nessesary
 - the length of the file is known before sending it making a `Content-Length` header possible (which let's the user know how long the download takes)
 - it is possible to resume a download if your psr7-emitter/framework supports it.
 - you don't have to output the stream to the browser, for example you can stream it using guzzle in a post request.
