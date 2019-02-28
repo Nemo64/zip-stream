@@ -15,7 +15,9 @@ class ZipResponse
 
     public static function create(ZipStream $stream, string $filename): ResponseInterface
     {
-        $headers = [];
+        $headers = [
+            'Content-Type' => 'application/zip',
+        ];
 
         $filenameFallback = preg_replace("/[^a-zA-Z0-9\\._-]/", '_', $filename);
         $headers['Content-Disposition'] = $filenameFallback !== $filename
